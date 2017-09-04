@@ -12,5 +12,12 @@
         <module>iot-server</module>
     </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.15.Final</version>
+        </dependency>
+    </dependencies>
 
 </project>

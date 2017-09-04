@@ -11,5 +11,11 @@
 
     <artifactId>iot-server</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>
