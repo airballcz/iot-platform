@@ -1,55 +1,45 @@
 package org.opensource.demo.iot.server.handler;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.mqtt.*;
-
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.netty.handler.codec.mqtt.MqttConnAckMessage;
+import io.netty.handler.codec.mqtt.MqttMessage;
+import io.netty.handler.codec.mqtt.MqttPubAckMessage;
+import io.netty.handler.codec.mqtt.MqttSubAckMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by zchen@idelan.cn on 2017/9/6.
  */
 public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage> {
 
-    private Map<String, String> topics = new HashMap<String, String>();
+    private static final Logger logger = LoggerFactory.getLogger(MqttInBoundHandler.class);
 
     protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) throws Exception {
-        System.out.println(">>>>>>>>>>>>>>>>>>>>" + msg.toString());
+        logger.debug(msg.toString());
 
-        MqttFixedHeader fixedHeader;
         switch (msg.fixedHeader().messageType()) {
-            case CONNECT:
-                MqttConnAckMessage connAckMessage = MqttConnectHandler.getInstance().doMessage(msg);
+            case CONNECT:       // 连接
+                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttConAckHandler.getInstance().doMessage(msg);
                 ctx.channel().writeAndFlush(connAckMessage);
                 break;
 
-            case PUBLISH:
-                System.out.println(">>>>>>>>>>>>>>>>PUBLISH");
-                MqttPublishVariableHeader publishVariableHeader = (MqttPublishVariableHeader) msg.variableHeader();
-                String topicName = publishVariableHeader.topicName();
-                ByteBuf payload = (ByteBuf) msg.payload();
-                topics.put(topicName, payload.toString(Charset.forName("UTF-8")));
-                System.out.println("topicName:" + topicName + ",payload:" + payload.toString(Charset.forName("UTF-8")));
-
-                fixedHeader = new MqttFixedHeader(MqttMessageType.PUBACK, false, MqttQoS.AT_LEAST_ONCE, true, 0);
-                MqttPubAckMessage pubAckMessage = new MqttPubAckMessage(fixedHeader, MqttMessageIdVariableHeader.from(1));
+            case PUBLISH:       // 发布
+                MqttPubAckMessage pubAckMessage = (MqttPubAckMessage) MqttPubAckHandler.getInstance().doMessage(msg);
                 ctx.channel().writeAndFlush(pubAckMessage);
                 break;
-            case SUBSCRIBE:
-                System.out.println(">>>>>>>>>>>>>>>>>>>SUBSCRIBE");
-                MqttSubscribePayload subscribePayload= (MqttSubscribePayload)msg.payload();
-                List<MqttTopicSubscription> topicSubscriptions = subscribePayload.topicSubscriptions();
-                MqttTopicSubscription topicSubscription;
-                for (int i=0;i<topicSubscriptions.size();i++) {
-                    topicSubscription = topicSubscriptions.get(i);
-                    topics.get(topicSubscription.topicName());
 
+            case SUBSCRIBE:     // 订阅
+                MqttSubAckMessage subAckMessage = (MqttSubAckMessage) MqttSubAckHandler.getInstance().doMessage(ctx, msg);
+                ctx.channel().writeAndFlush(subAckMessage);
+                break;
 
-                }
+            case PINGREQ:       // PING反馈
+                MqttMessage message = MqttPingRespHandler.getInstance().doMessage(msg);
+                ctx.channel().writeAndFlush(message);
+                break;
+
             default:
                 break;
         }

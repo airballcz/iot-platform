@@ -27,11 +27,23 @@ public class MqttClient {
     @Test
     public void publishTest() {
         client.publish("/topic/test", "hello,world");
+
+        try {
+            Thread.sleep(Integer.MAX_VALUE);
+        } catch (InterruptedException e) {
+
+        }
     }
 
     @Test
     public void subscribeTest() {
         client.subscribe("/topic/test");
+
+        try {
+            Thread.sleep(Integer.MAX_VALUE);
+        } catch (InterruptedException e) {
+
+        }
     }
 
 }

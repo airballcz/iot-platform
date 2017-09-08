@@ -80,7 +80,8 @@ public class MyMqttFactory implements MqttCallbackExtended {
     public void publish(String topicName, String payload) {
         try {
             MqttMessage message = new MqttMessage(payload.getBytes());
-            client.publish(topicName, message);
+            IMqttDeliveryToken token = client.publish(topicName, message);
+            token.waitForCompletion();
             log.debug("Mqtt发布主题 [{}] 内容 [{}] 成功", topicName, payload);
         } catch (Exception e) {
             log.warn("Mqtt发布主题 [{}] 内容 [{}] 失败:{}", topicName, payload, e.getMessage());
