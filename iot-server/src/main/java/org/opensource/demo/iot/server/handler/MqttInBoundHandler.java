@@ -1,25 +1,58 @@
 package org.opensource.demo.iot.server.handler;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.mqtt.*;
+
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zchen@idelan.cn on 2017/9/6.
  */
 public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage> {
 
-    protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) throws Exception {
-        System.out.println(msg.toString());
-    }
+    private Map<String, String> topics = new HashMap<String, String>();
 
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-//        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_LEAST_ONCE, true, 0);
-//        MqttConnAckVariableHeader connAckVariableHeader = new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_ACCEPTED, true);
-//        MqttConnAckMessage connAckMessage = new MqttConnAckMessage(fixedHeader, connAckVariableHeader);
-////        MqttConnectMessage connectMessage = new MqttConnectMessage(fixedHeader, null, null);
-//        ctx.channel().writeAndFlush(connAckMessage);
+    protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) throws Exception {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>" + msg.toString());
+
+        MqttFixedHeader fixedHeader;
+        switch (msg.fixedHeader().messageType()) {
+            case CONNECT:
+                MqttConnAckMessage connAckMessage = MqttConnectHandler.getInstance().doMessage(msg);
+                ctx.channel().writeAndFlush(connAckMessage);
+                break;
+
+            case PUBLISH:
+                System.out.println(">>>>>>>>>>>>>>>>PUBLISH");
+                MqttPublishVariableHeader publishVariableHeader = (MqttPublishVariableHeader) msg.variableHeader();
+                String topicName = publishVariableHeader.topicName();
+                ByteBuf payload = (ByteBuf) msg.payload();
+                topics.put(topicName, payload.toString(Charset.forName("UTF-8")));
+                System.out.println("topicName:" + topicName + ",payload:" + payload.toString(Charset.forName("UTF-8")));
+
+                fixedHeader = new MqttFixedHeader(MqttMessageType.PUBACK, false, MqttQoS.AT_LEAST_ONCE, true, 0);
+                MqttPubAckMessage pubAckMessage = new MqttPubAckMessage(fixedHeader, MqttMessageIdVariableHeader.from(1));
+                ctx.channel().writeAndFlush(pubAckMessage);
+                break;
+            case SUBSCRIBE:
+                System.out.println(">>>>>>>>>>>>>>>>>>>SUBSCRIBE");
+                MqttSubscribePayload subscribePayload= (MqttSubscribePayload)msg.payload();
+                List<MqttTopicSubscription> topicSubscriptions = subscribePayload.topicSubscriptions();
+                MqttTopicSubscription topicSubscription;
+                for (int i=0;i<topicSubscriptions.size();i++) {
+                    topicSubscription = topicSubscriptions.get(i);
+                    topics.get(topicSubscription.topicName());
+
+
+                }
+            default:
+                break;
+        }
     }
 
     @Override

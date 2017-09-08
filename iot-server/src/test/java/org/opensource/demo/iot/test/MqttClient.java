@@ -1,5 +1,6 @@
 package org.opensource.demo.iot.test;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.opensource.demo.iot.test.core.MyMqttFactory;
 
@@ -10,13 +11,14 @@ import org.opensource.demo.iot.test.core.MyMqttFactory;
  */
 public class MqttClient {
 
-    @Test
-    public void initTest() {
-        MyMqttFactory factory = new MyMqttFactory();
-        try {
-            factory.start("tcp://127.0.0.1:1883", "username", "password");
+    private MyMqttFactory client;
 
-            Thread.sleep(Integer.MAX_VALUE);
+    @Before
+    public void initTest() {
+        client = new MyMqttFactory();
+        try {
+            client.start("tcp://127.0.0.1:1883", "username", "password");
+            Thread.sleep(5000);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -24,17 +26,12 @@ public class MqttClient {
 
     @Test
     public void publishTest() {
-        MyMqttFactory factory = new MyMqttFactory();
-        try {
-            factory.start("tcp://127.0.0.1:1883");
+        client.publish("/topic/test", "hello,world");
+    }
 
-            Thread.sleep(20000);
-            factory.publish("/topic/test", "hello,world");
-
-            Thread.sleep(Integer.MAX_VALUE);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @Test
+    public void subscribeTest() {
+        client.subscribe("/topic/test");
     }
 
 }
