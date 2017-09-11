@@ -1,9 +1,7 @@
 package org.opensource.demo.iot.server.handler;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.*;
 import org.opensource.demo.iot.server.core.ApplicationContext;
 import org.slf4j.Logger;
@@ -40,16 +38,15 @@ public class MqttPubAckHandler {
         String topicName = publishVariableHeader.topicName();
         ByteBuf payload = (ByteBuf) msg.payload();
         topics.put(topicName, payload.toString(Charset.forName("UTF-8")));
-        System.out.println("topicName:" + topicName + ",payload:" + payload.toString(Charset.forName("UTF-8")));
+        logger.debug("topicName:" + topicName + ",payload:" + payload.toString(Charset.forName("UTF-8")));
 
         // 发布消息至相关订阅
-        ChannelHandlerContext ctx = ApplicationContext.getContext(topicName);
-        if (ctx != null) {
+        Channel channel = ApplicationContext.getContext(topicName);
+        if (channel != null) {
             fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, true, 0);
             publishVariableHeader = new MqttPublishVariableHeader(topicName, 1);
             MqttPublishMessage publishMessage = new MqttPublishMessage(fixedHeader, publishVariableHeader, payload);
-            ctx.writeAndFlush(publishMessage);
-            ctx.close();
+            channel.writeAndFlush(publishMessage);
         }
 
         // 消息响应反馈

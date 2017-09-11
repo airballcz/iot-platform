@@ -21,7 +21,7 @@ public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage>
 
         switch (msg.fixedHeader().messageType()) {
             case CONNECT:       // 连接
-                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttConAckHandler.getInstance().doMessage(msg);
+                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttConAckHandler.getInstance().doMessage(ctx, msg);
                 ctx.channel().writeAndFlush(connAckMessage);
                 break;
 
@@ -52,6 +52,7 @@ public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage>
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        logger.debug("mqtt exception:" + cause.getMessage());
         ctx.close();
     }
 

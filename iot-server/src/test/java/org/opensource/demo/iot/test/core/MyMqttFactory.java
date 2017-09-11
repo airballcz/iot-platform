@@ -38,6 +38,7 @@ public class MyMqttFactory implements MqttCallbackExtended {
         options.setUserName(username);
         options.setPassword(password.toCharArray());
         options.setAutomaticReconnect(Boolean.TRUE);
+        options.setKeepAliveInterval(600);
         client.connect(options, this, new MqttActionListener());
         log.debug("[{}], 连接MQTT服务 [{}] 成功, 用户名 [{}], 密码 [{}].", uuid, url, username, password);
     }

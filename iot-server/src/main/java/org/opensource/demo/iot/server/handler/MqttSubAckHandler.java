@@ -6,9 +6,7 @@ import org.opensource.demo.iot.server.core.ApplicationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by zchen@idelan.cn on 2017/9/8.
@@ -34,7 +32,7 @@ public class MqttSubAckHandler {
         MqttTopicSubscription topicSubscription;
         for (int i = 0; i < topicSubscriptions.size(); i++) {
             topicSubscription = topicSubscriptions.get(i);
-            ApplicationContext.setContext(topicSubscription.topicName(), ctx);
+            ApplicationContext.setContext(topicSubscription.topicName(), ctx.channel());
         }
 
         MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.SUBACK, false, MqttQoS.AT_LEAST_ONCE, true, 0);
