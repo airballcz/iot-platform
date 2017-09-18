@@ -30,15 +30,15 @@ public class MyMqttFactory implements MqttCallbackExtended {
      * @param password
      * @throws MqttException
      */
-    public void start(String url, String username, String password) throws MqttException {
+    public void start(String url, String username, String password, int keepAliveInterval, boolean reconnect) throws MqttException {
         String uuid = UUID.randomUUID().toString();
         client = new MqttAsyncClient(url, uuid, new MemoryPersistence());
         client.setCallback(this);
         options = new MqttConnectOptions();
         options.setUserName(username);
         options.setPassword(password.toCharArray());
-        options.setAutomaticReconnect(Boolean.TRUE);
-        options.setKeepAliveInterval(600);
+        options.setAutomaticReconnect(reconnect);
+        options.setKeepAliveInterval(keepAliveInterval);
         client.connect(options, this, new MqttActionListener());
         log.debug("[{}], 连接MQTT服务 [{}] 成功, 用户名 [{}], 密码 [{}].", uuid, url, username, password);
     }

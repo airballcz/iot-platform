@@ -5,6 +5,7 @@ import io.netty.handler.codec.mqtt.*;
 import org.opensource.demo.iot.server.Application;
 import org.opensource.demo.iot.server.auth.AuthStrategy;
 import org.opensource.demo.iot.server.core.ApplicationContext;
+import org.opensource.demo.iot.server.core.Session;
 import org.opensource.demo.iot.server.exception.AuthenticationException;
 import org.opensource.demo.iot.server.exception.MqttConnectionException;
 import org.slf4j.Logger;
@@ -29,7 +30,8 @@ public class MqttConAckHandler {
     }
 
     public MqttMessage doMessage(ChannelHandlerContext ctx, MqttMessage msg) throws MqttConnectionException {
-        logger.debug("MQTT CONNECT");
+        logger.debug("MQTT CONNECT " +  ctx.channel().id().asLongText());
+
         MqttConnectReturnCode connectReturnCode = MqttConnectReturnCode.CONNECTION_ACCEPTED;
 
         MqttConnectVariableHeader connectVariableHeader = (MqttConnectVariableHeader) msg.variableHeader();
@@ -48,16 +50,22 @@ public class MqttConAckHandler {
         if (!connectVariableHeader.hasUserName() || !connectVariableHeader.hasPassword()) {
             throw new AuthenticationException("mqtt connection need username and password to authentication");
         }
-        if (!AuthStrategy.auth(connectPayload.userName(), connectPayload.passwordInBytes())) {    // 认证未通过，关闭网络连接
+        String username = connectPayload.userName();
+        byte[] password = connectPayload.passwordInBytes();
+        if (!AuthStrategy.auth(username, password)) {    // 认证未通过，关闭网络连接
             connectReturnCode = MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD;
         }
 
         String clientId = connectPayload.clientIdentifier();
         // 当前channel保存至上下文环境
-        ApplicationContext.setClientIdChannel(clientId, ctx.channel());
-
-        // TODO: 2017/9/8  规则，在keepAliveTime*1.5时间内未收到消息，服务端断开连接
-        int keepAliveTime = connectVariableHeader.keepAliveTimeSeconds();
+        Session session = new Session();
+        session.setClientId(clientId);
+        session.setChannel(ctx.channel());
+        session.setUsername(username);
+        session.setPassword(password);
+        session.setKeepAliveTime(connectVariableHeader.keepAliveTimeSeconds());
+        session.setConnectTime(System.currentTimeMillis());
+        ApplicationContext.setChannelBySessionId(ctx.channel().id().asLongText(), session);
 
         // TODO: 2017/9/8 关于clean session状态逻辑设置
         boolean isCleanSession = connectVariableHeader.isCleanSession();

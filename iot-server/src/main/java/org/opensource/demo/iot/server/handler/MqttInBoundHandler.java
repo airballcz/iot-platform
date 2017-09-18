@@ -6,6 +6,7 @@ import io.netty.handler.codec.mqtt.MqttConnAckMessage;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttPubAckMessage;
 import io.netty.handler.codec.mqtt.MqttSubAckMessage;
+import org.opensource.demo.iot.server.core.ApplicationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage>
                 break;
 
             case PINGREQ:       // PING反馈
-                MqttMessage message = MqttPingRespHandler.getInstance().doMessage(msg);
+                MqttMessage message = MqttPingRespHandler.getInstance().doMessage(ctx, msg);
                 ctx.channel().writeAndFlush(message);
                 break;
 
@@ -53,6 +54,7 @@ public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage>
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.debug("mqtt exception:" + cause.getMessage());
+        ApplicationContext.removeChannelBySessionId(ctx.channel().id().asLongText());
         ctx.close();
     }
 
