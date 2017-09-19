@@ -57,6 +57,15 @@ public class MqttConAckHandler {
         }
 
         String clientId = connectPayload.clientIdentifier();
+
+        // TODO: 2017/9/8 关于clean session状态逻辑设置
+        boolean isCleanSession = connectVariableHeader.isCleanSession();
+        boolean sessionPresent = true;
+        if (isCleanSession) {           // 删除clientId对应的相关信息
+
+            sessionPresent = false;
+        }
+
         // 当前channel保存至上下文环境
         Session session = new Session();
         session.setClientId(clientId);
@@ -66,13 +75,6 @@ public class MqttConAckHandler {
         session.setKeepAliveTime(connectVariableHeader.keepAliveTimeSeconds());
         session.setConnectTime(System.currentTimeMillis());
         ApplicationContext.setChannelBySessionId(ctx.channel().id().asLongText(), session);
-
-        // TODO: 2017/9/8 关于clean session状态逻辑设置
-        boolean isCleanSession = connectVariableHeader.isCleanSession();
-        boolean sessionPresent = true;
-        if (isCleanSession) {
-            sessionPresent = false;
-        }
 
         // 设置响应报文
         MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_LEAST_ONCE, true, 0);

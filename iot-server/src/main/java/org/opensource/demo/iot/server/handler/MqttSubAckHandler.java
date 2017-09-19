@@ -40,6 +40,8 @@ public class MqttSubAckHandler {
         MqttSubAckPayload subAckPayload = new MqttSubAckPayload(MqttQoS.AT_LEAST_ONCE.value());
         MqttSubAckMessage subAckMessage = new MqttSubAckMessage(fixedHeader, messageIdVariableHeader, subAckPayload);
 
+        // TODO: 2017/9/19 找机会触发之前保留，并符合此次订阅主题的消息
+
         return subAckMessage;
     }
 

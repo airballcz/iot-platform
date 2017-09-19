@@ -47,7 +47,7 @@ public class MqttClient {
 
     @Test
     public void increaseTest() throws Exception {
-        for (int i = 0; i < 50000; i++) {
+        for (int i = 0; i < 5000; i++) {
             Thread thread = new Thread(() -> {
                 try {
                     MyMqttFactory client = new MyMqttFactory();

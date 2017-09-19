@@ -63,7 +63,7 @@ public class ApplicationContext {
         SESSIONID_CONTEXT_MAP.remove(sessionId);
     }
 
-
+    // 定时检查超时任务并从上下文环境删除
     private static class CheckTimeoutWork implements Runnable {
 
         private String sessionId;
