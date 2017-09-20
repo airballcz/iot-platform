@@ -1,7 +1,7 @@
 package org.opensource.demo.iot.test;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.omg.IOP.ExceptionDetailMessage;
 import org.opensource.demo.iot.test.core.MyMqttFactory;
 
 /**
@@ -13,7 +13,7 @@ public class MqttClient {
 
     private MyMqttFactory client;
 
-    //    @Before
+    @Before
     public void initTest() {
         client = new MyMqttFactory();
         try {

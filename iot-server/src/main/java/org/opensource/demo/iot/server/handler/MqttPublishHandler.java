@@ -4,30 +4,32 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.*;
 import org.opensource.demo.iot.server.core.ApplicationContext;
-import org.opensource.demo.iot.server.msg.MessageHandler;
+import org.opensource.demo.iot.server.msg.PublishContainer;
+import org.opensource.demo.iot.server.msg.SubscribeContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
  * Created by zchen@idelan.cn on 2017/9/7.
  */
-public class MqttPubAckHandler {
+public class MqttPublishHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttConAckHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(MqttConnectHandler.class);
 
     private Map<String, String> topics = new HashMap<String, String>();
 
-    private static MqttPubAckHandler ourInstance = new MqttPubAckHandler();
+    private static MqttPublishHandler ourInstance = new MqttPublishHandler();
 
-    public static MqttPubAckHandler getInstance() {
+    public static MqttPublishHandler getInstance() {
         return ourInstance;
     }
 
-    private MqttPubAckHandler() {
+    private MqttPublishHandler() {
     }
 
     public MqttMessage doMessage(MqttMessage msg) {
@@ -46,20 +48,29 @@ public class MqttPubAckHandler {
         MqttPublishVariableHeader publishVariableHeader = (MqttPublishVariableHeader) msg.variableHeader();
         String topicName = publishVariableHeader.topicName();
         ByteBuf payload = (ByteBuf) msg.payload();
-        if(isRetain) {      // 保存相关内容
-            MessageHandler.put(topicName, payload.toString(Charset.forName("UTF-8")), fixedHeader.qosLevel());
-            // TODO: 2017/9/19 设法保存主题和订阅者相关信息
-
+        if (isRetain) {      // 保存需要retain的主题
+            PublishContainer.put(topicName, payload.toString(Charset.forName("UTF-8")), fixedHeader.qosLevel());
         }
         logger.debug("topicName:" + topicName + ",payload:" + payload.toString(Charset.forName("UTF-8")));
 
-        // 发布消息至相关订阅
-        Channel channel = ApplicationContext.getContext(topicName);
-        if (channel != null) {
-            fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, true, 0);
-            publishVariableHeader = new MqttPublishVariableHeader(topicName, 1);
-            MqttPublishMessage publishMessage = new MqttPublishMessage(fixedHeader, publishVariableHeader, payload);
-            channel.writeAndFlush(publishMessage);
+        // 发布消息至相关符合主题的订阅channel
+        MqttPublishMessage publishMessage;
+        Iterator<SubscribeContainer.Message> messages = SubscribeContainer.get(topicName);
+        SubscribeContainer.Message message;
+        Channel channel;
+        if (messages != null) {
+            while (messages.hasNext()) {
+                message = messages.next();
+
+                fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, message.getQoS(), true, 0);
+                publishVariableHeader = new MqttPublishVariableHeader(topicName, 1);
+                publishMessage = new MqttPublishMessage(fixedHeader, publishVariableHeader, payload);
+
+                channel = ApplicationContext.getChannelBySessionId(message.getSessionId());
+                if (channel != null) {
+                    channel.write(publishMessage);
+                }
+            }
         }
 
         // 消息响应反馈

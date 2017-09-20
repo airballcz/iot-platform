@@ -9,13 +9,13 @@ import io.netty.channel.Channel;
  */
 public class Session {
 
-    private String clientId;
+    private String clientId;    // N:1 clientId与sessionId关系
 
     private int keepAliveTime;  // unit "second"
 
     private long connectTime;   // unit "millisecond", init connect time or any other operator time;
 
-    private Channel channel;
+    private Channel channel;    // 1:1 channel与sessionId关系
 
     private String username;
 

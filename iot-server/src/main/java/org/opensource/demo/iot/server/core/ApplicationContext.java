@@ -23,17 +23,6 @@ public class ApplicationContext {
 
     private static final ScheduledThreadPoolExecutor SESSIONID_CONTEXT_SCHEDULED_POOL = new ScheduledThreadPoolExecutor(1);
 
-
-    private static final ConcurrentHashMap<String, Channel> CONTEXT_CONCURRENT_HASH_MAP = new ConcurrentHashMap<String, Channel>();
-
-    public static void setContext(String topic, Channel channel) {
-        CONTEXT_CONCURRENT_HASH_MAP.put(topic, channel);
-    }
-
-    public static Channel getContext(String topic) {
-        return CONTEXT_CONCURRENT_HASH_MAP.get(topic);
-    }
-
     /**
      * 设置上下文环境
      *
@@ -47,6 +36,21 @@ public class ApplicationContext {
         // 规则，在keepAliveTime*1.5时间内未收到消息，服务端断开连接
         // 加入定时任务，是否出现超时问题
         SESSIONID_CONTEXT_SCHEDULED_POOL.schedule(new CheckTimeoutWork(sessionId), session.getKeepAliveTime() * 1500, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * 根据sessionId返回对应channel
+     *
+     * @param sessionId
+     * @return
+     */
+    public static Channel getChannelBySessionId(String sessionId) {
+        Session session = SESSIONID_CONTEXT_MAP.get(sessionId);
+        if (session != null) {
+            return session.getChannel();
+        }
+
+        return null;
     }
 
     public static void updateChannelBySessionId(String sessionId) {

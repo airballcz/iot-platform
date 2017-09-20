@@ -39,7 +39,7 @@ public class MyMqttFactory implements MqttCallbackExtended {
         options.setPassword(password.toCharArray());
         options.setAutomaticReconnect(reconnect);
         options.setKeepAliveInterval(keepAliveInterval);
-        client.connect(options, this, new MqttActionListener());
+        client.connect(options, this, new MqttActionListener()).waitForCompletion();
         log.debug("[{}], 连接MQTT服务 [{}] 成功, 用户名 [{}], 密码 [{}].", uuid, url, username, password);
     }
 
@@ -81,6 +81,7 @@ public class MyMqttFactory implements MqttCallbackExtended {
     public void publish(String topicName, String payload) {
         try {
             MqttMessage message = new MqttMessage(payload.getBytes());
+            message.setRetained(true);
             IMqttDeliveryToken token = client.publish(topicName, message);
             token.waitForCompletion();
             log.debug("Mqtt发布主题 [{}] 内容 [{}] 成功", topicName, payload);

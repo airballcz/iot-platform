@@ -2,7 +2,6 @@ package org.opensource.demo.iot.server.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.*;
-import org.opensource.demo.iot.server.Application;
 import org.opensource.demo.iot.server.auth.AuthStrategy;
 import org.opensource.demo.iot.server.core.ApplicationContext;
 import org.opensource.demo.iot.server.core.Session;
@@ -16,17 +15,17 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Created by zchen@idelan.cn on 2017/9/7.
  */
-public class MqttConAckHandler {
+public class MqttConnectHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttConAckHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(MqttConnectHandler.class);
 
-    private static MqttConAckHandler ourInstance = new MqttConAckHandler();
+    private static MqttConnectHandler ourInstance = new MqttConnectHandler();
 
-    public static MqttConAckHandler getInstance() {
+    public static MqttConnectHandler getInstance() {
         return ourInstance;
     }
 
-    private MqttConAckHandler() {
+    private MqttConnectHandler() {
     }
 
     public MqttMessage doMessage(ChannelHandlerContext ctx, MqttMessage msg) throws MqttConnectionException {

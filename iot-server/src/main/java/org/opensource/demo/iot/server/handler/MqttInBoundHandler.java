@@ -22,22 +22,22 @@ public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage>
 
         switch (msg.fixedHeader().messageType()) {
             case CONNECT:       // 连接
-                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttConAckHandler.getInstance().doMessage(ctx, msg);
+                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttConnectHandler.getInstance().doMessage(ctx, msg);
                 ctx.channel().writeAndFlush(connAckMessage);
                 break;
 
             case PUBLISH:       // 发布
-                MqttPubAckMessage pubAckMessage = (MqttPubAckMessage) MqttPubAckHandler.getInstance().doMessage(msg);
+                MqttPubAckMessage pubAckMessage = (MqttPubAckMessage) MqttPublishHandler.getInstance().doMessage(msg);
                 ctx.channel().writeAndFlush(pubAckMessage);
                 break;
 
             case SUBSCRIBE:     // 订阅
-                MqttSubAckMessage subAckMessage = (MqttSubAckMessage) MqttSubAckHandler.getInstance().doMessage(ctx, msg);
+                MqttSubAckMessage subAckMessage = (MqttSubAckMessage) MqttSubscribeHandler.getInstance().doMessage(ctx, msg);
                 ctx.channel().writeAndFlush(subAckMessage);
                 break;
 
             case PINGREQ:       // PING反馈
-                MqttMessage message = MqttPingRespHandler.getInstance().doMessage(ctx, msg);
+                MqttMessage message = MqttPingReqHandler.getInstance().doMessage(ctx, msg);
                 ctx.channel().writeAndFlush(message);
                 break;
 

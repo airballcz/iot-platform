@@ -14,17 +14,17 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Created by zchen@idelan.cn on 2017/9/8.
  */
-public class MqttPingRespHandler {
+public class MqttPingReqHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttPingRespHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(MqttPingReqHandler.class);
 
-    private static MqttPingRespHandler ourInstance = new MqttPingRespHandler();
+    private static MqttPingReqHandler ourInstance = new MqttPingReqHandler();
 
-    public static MqttPingRespHandler getInstance() {
+    public static MqttPingReqHandler getInstance() {
         return ourInstance;
     }
 
-    private MqttPingRespHandler() {
+    private MqttPingReqHandler() {
     }
 
     public MqttMessage doMessage(ChannelHandlerContext ctx, MqttMessage msg) {
