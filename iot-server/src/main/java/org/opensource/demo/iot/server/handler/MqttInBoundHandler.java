@@ -2,15 +2,14 @@ package org.opensource.demo.iot.server.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.mqtt.MqttConnAckMessage;
 import io.netty.handler.codec.mqtt.MqttMessage;
-import io.netty.handler.codec.mqtt.MqttPubAckMessage;
-import io.netty.handler.codec.mqtt.MqttSubAckMessage;
 import org.opensource.demo.iot.server.core.ApplicationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * 总控制中心
+ *
  * Created by zchen@idelan.cn on 2017/9/6.
  */
 public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage> {
@@ -20,30 +19,33 @@ public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage>
     protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) throws Exception {
         logger.debug(msg.toString());
 
+        MqttMessage mqttMessage = null;
         switch (msg.fixedHeader().messageType()) {
             case CONNECT:       // 连接
-                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttConnectHandler.getInstance().doMessage(ctx, msg);
-                ctx.channel().writeAndFlush(connAckMessage);
+                mqttMessage = MqttConnectHandler.getInstance().doMessage(ctx, msg);
                 break;
 
             case PUBLISH:       // 发布
-                MqttPubAckMessage pubAckMessage = (MqttPubAckMessage) MqttPublishHandler.getInstance().doMessage(msg);
-                ctx.channel().writeAndFlush(pubAckMessage);
+                mqttMessage = MqttPublishHandler.getInstance().doMessage(msg);
                 break;
 
             case SUBSCRIBE:     // 订阅
-                MqttSubAckMessage subAckMessage = (MqttSubAckMessage) MqttSubscribeHandler.getInstance().doMessage(ctx, msg);
-                ctx.channel().writeAndFlush(subAckMessage);
+                mqttMessage = MqttSubscribeHandler.getInstance().doMessage(ctx, msg);
                 break;
 
-            case PINGREQ:       // PING反馈
-                MqttMessage message = MqttPingReqHandler.getInstance().doMessage(ctx, msg);
-                ctx.channel().writeAndFlush(message);
+            case UNSUBSCRIBE:   // 取消订阅
+                mqttMessage = MqttUnSubscribeHandler.getInstance().doMessage(ctx, msg);
+                break;
+
+            case PINGREQ:       // PING-心跳
+                mqttMessage = MqttPingReqHandler.getInstance().doMessage(ctx, msg);
                 break;
 
             default:
                 break;
         }
+
+        ctx.channel().writeAndFlush(mqttMessage);
     }
 
     @Override
