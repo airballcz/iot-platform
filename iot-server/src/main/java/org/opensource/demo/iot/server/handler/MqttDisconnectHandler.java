@@ -6,21 +6,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 取消订阅Handler
- * <p>
+ * 断开连接Handler
+ *
  * Created by zchen@idelan.cn on 2017/9/20.
  */
-public class MqttUnSubscribeHandler {
+public class MqttDisconnectHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttUnSubscribeHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(MqttDisconnectHandler.class);
 
-    private static MqttUnSubscribeHandler ourInstance = new MqttUnSubscribeHandler();
+    private static MqttDisconnectHandler ourInstance = new MqttDisconnectHandler();
 
-    public static MqttUnSubscribeHandler getInstance() {
+    public static MqttDisconnectHandler getInstance() {
         return ourInstance;
     }
 
-    private MqttUnSubscribeHandler() {
+    private MqttDisconnectHandler() {
     }
 
     public MqttMessage doMessage(ChannelHandlerContext ctx, MqttMessage msg) {

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 总控制中心
- *
+ * <p>
  * Created by zchen@idelan.cn on 2017/9/6.
  */
 public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage> {
@@ -39,6 +39,10 @@ public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage>
 
             case PINGREQ:       // PING-心跳
                 mqttMessage = MqttPingReqHandler.getInstance().doMessage(ctx, msg);
+                break;
+
+            case DISCONNECT:    // 断开连接
+                mqttMessage = MqttDisconnectHandler.getInstance().doMessage(ctx, msg);
                 break;
 
             default:
