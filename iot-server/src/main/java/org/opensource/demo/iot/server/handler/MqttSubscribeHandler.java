@@ -1,6 +1,7 @@
 package org.opensource.demo.iot.server.handler;
 
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.*;
 import org.opensource.demo.iot.server.msg.PublishContainer;
@@ -26,7 +27,7 @@ public class MqttSubscribeHandler {
     private MqttSubscribeHandler() {
     }
 
-    public MqttMessage doMessage(ChannelHandlerContext ctx, MqttMessage msg) {
+    public MqttMessage doMessage(Channel channel, MqttMessage msg) {
         logger.debug("MQTT SUBSCRIBE");
         MqttFixedHeader fixedHeader;
 
@@ -43,7 +44,7 @@ public class MqttSubscribeHandler {
             topicSubscription = topicSubscriptions.get(i);
             qos = topicSubscription.qualityOfService();
             topic = topicSubscription.topicName();
-            sessionId = ctx.channel().id().asLongText();
+            sessionId = channel.id().asLongText();
 
             // 保存订阅相关信息
             SubscribeContainer.put(topic, sessionId, qos);
@@ -55,7 +56,7 @@ public class MqttSubscribeHandler {
                 publishVariableHeader = new MqttPublishVariableHeader(message.getTopic(), 1);
                 publishMessage = new MqttPublishMessage(fixedHeader, publishVariableHeader, Unpooled.copiedBuffer(message.getPayload().getBytes()));
 
-                ctx.channel().writeAndFlush(publishMessage);
+                channel.writeAndFlush(publishMessage);
             }
         }
 

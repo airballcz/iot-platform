@@ -8,6 +8,5 @@ Internet Of Things Platform
 ## 2、功能
 * 支持MQTT协议，实现命令包括连接请求应答、PING应答、简单发布应答命令、简单订阅应答命令；
 
-## 3、下阶段需要完善的内容
-* 代码重构优化，设计模式完善现阶段命令响应部分代码；
-* 细化连接应答命令，支持Qos=0、Qos=1模式连接设置等细节问题；
+## 参考文献
+* [MQTT协议中文版](https://www.gitbook.com/book/mcxiaoke/mqtt-cn/details)

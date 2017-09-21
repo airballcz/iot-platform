@@ -66,7 +66,7 @@ public class MqttPublishHandler {
                 publishVariableHeader = new MqttPublishVariableHeader(topicName, 1);
                 publishMessage = new MqttPublishMessage(fixedHeader, publishVariableHeader, payload);
 
-                channel = ApplicationContext.getChannelBySessionId(message.getSessionId());
+                channel = ApplicationContext.getChannelFromContext(message.getClientId());
                 if (channel != null) {
                     channel.write(publishMessage);
                 }

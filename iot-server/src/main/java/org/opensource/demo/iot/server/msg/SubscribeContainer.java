@@ -15,11 +15,12 @@ import java.util.Map;
  */
 public class SubscribeContainer {
 
+    // TODO: 2017/9/21 未考虑同步问题
     private static final Map<String, LinkedList<Message>> container = new HashMap<>();
 
-    public static void put(String topic, String sessionId, MqttQoS qos) {
+    public static void put(String topic, String clientId, MqttQoS qos) {
         Message message = new Message();
-        message.setSessionId(sessionId);
+        message.setClientId(clientId);
         message.setQoS(qos);
 
         LinkedList<Message> messages;
@@ -44,21 +45,35 @@ public class SubscribeContainer {
         return null;
     }
 
+    // 根据clientId删除订阅消息容器中无效的channel
+    public static void removeClientId(String clientId) {
+        Iterator<LinkedList<Message>> collection = container.values().iterator();
+        LinkedList<Message> messages;
+        Message message = new Message();
+        message.setClientId(clientId);
+        while (collection.hasNext()) {
+            messages = collection.next();
+            if (messages.contains(message)) {
+                messages.remove(message);
+            }
+        }
+    }
+
     /**
      * 订阅消息结构
      */
     public static class Message {
 
-        private String sessionId;
+        private String clientId;
 
         private MqttQoS qoS;
 
-        public String getSessionId() {
-            return sessionId;
+        public String getClientId() {
+            return clientId;
         }
 
-        public void setSessionId(String sessionId) {
-            this.sessionId = sessionId;
+        public void setClientId(String clientId) {
+            this.clientId = clientId;
         }
 
         public MqttQoS getQoS() {
@@ -79,20 +94,20 @@ public class SubscribeContainer {
                 return true;
             }
 
-            if (!(obj instanceof SubscribeContainer.Message)) {
+            if (!(obj instanceof Message)) {
                 return false;
             }
 
-            return this.sessionId.equals(((SubscribeContainer.Message) obj).getSessionId());
+            return this.clientId.equals(((Message) obj).getClientId());
         }
 
         @Override
         public int hashCode() {
-            if (this.sessionId == null) {
+            if (this.clientId == null) {
                 return 0;
             }
 
-            return this.sessionId.hashCode();
+            return this.clientId.hashCode();
         }
     }
 

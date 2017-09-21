@@ -22,7 +22,7 @@ public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage>
         MqttMessage mqttMessage = null;
         switch (msg.fixedHeader().messageType()) {
             case CONNECT:       // 连接
-                mqttMessage = MqttConnectHandler.getInstance().doMessage(ctx, msg);
+                mqttMessage = MqttConnectHandler.getInstance().doMessage(ctx.channel(), msg);
                 break;
 
             case PUBLISH:       // 发布
@@ -30,19 +30,19 @@ public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage>
                 break;
 
             case SUBSCRIBE:     // 订阅
-                mqttMessage = MqttSubscribeHandler.getInstance().doMessage(ctx, msg);
+                mqttMessage = MqttSubscribeHandler.getInstance().doMessage(ctx.channel(), msg);
                 break;
 
             case UNSUBSCRIBE:   // 取消订阅
-                mqttMessage = MqttUnSubscribeHandler.getInstance().doMessage(ctx, msg);
+                mqttMessage = MqttUnSubscribeHandler.getInstance().doMessage(ctx.channel(), msg);
                 break;
 
             case PINGREQ:       // PING-心跳
-                mqttMessage = MqttPingReqHandler.getInstance().doMessage(ctx, msg);
+                mqttMessage = MqttPingReqHandler.getInstance().doMessage(ctx.channel(), msg);
                 break;
 
             case DISCONNECT:    // 断开连接
-                mqttMessage = MqttDisconnectHandler.getInstance().doMessage(ctx, msg);
+                MqttDisconnectHandler.getInstance().doMessage(ctx.channel());
                 break;
 
             default:
@@ -60,7 +60,7 @@ public class MqttInBoundHandler extends SimpleChannelInboundHandler<MqttMessage>
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.debug("mqtt exception:" + cause.getMessage());
-        ApplicationContext.removeChannelBySessionId(ctx.channel().id().asLongText());
+        MqttDisconnectHandler.getInstance().doMessage(ctx.channel());
         ctx.close();
     }
 

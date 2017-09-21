@@ -1,5 +1,6 @@
 package org.opensource.demo.iot.server.handler;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ public class MqttUnSubscribeHandler {
     private MqttUnSubscribeHandler() {
     }
 
-    public MqttMessage doMessage(ChannelHandlerContext ctx, MqttMessage msg) {
+    public MqttMessage doMessage(Channel channel, MqttMessage msg) {
 
         return null;
     }

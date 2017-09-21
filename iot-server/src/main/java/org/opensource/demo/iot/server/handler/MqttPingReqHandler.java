@@ -1,5 +1,6 @@
 package org.opensource.demo.iot.server.handler;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessage;
@@ -27,11 +28,12 @@ public class MqttPingReqHandler {
     private MqttPingReqHandler() {
     }
 
-    public MqttMessage doMessage(ChannelHandlerContext ctx, MqttMessage msg) {
-        logger.debug("MQTT PINGREQ " + ctx.channel().id().asLongText());
+    public MqttMessage doMessage(Channel channel, MqttMessage msg) {
+        String channelId = channel.id().asLongText();
+        logger.debug("MQTT PINGREQ " + channelId);
 
         // 更新最新连接时间
-        ApplicationContext.updateChannelBySessionId(ctx.channel().id().asLongText());
+        ApplicationContext.updateChannelConTime(channelId);
 
         MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PINGRESP, false, MqttQoS.AT_LEAST_ONCE, true, 0);
         MqttMessage message = new MqttMessage(fixedHeader);
