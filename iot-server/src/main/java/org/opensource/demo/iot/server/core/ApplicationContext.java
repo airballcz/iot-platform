@@ -74,15 +74,15 @@ public class ApplicationContext {
     }
 
     /**
-     * 上下文环境删除clientId对应信息
+     * 上下文环境删除channelId对应信息
      *
-     * @param clientId
+     * @param channelId
      */
-    public static void removeChannelFromContext(String clientId) {
-        Session session = CONTEXT_MAP.remove(clientId);
+    public static void removeChannelFromContext(String channelId) {
+        Session session = getSessionByChannelId(channelId);
         if (session != null && session.getChannel() != null) {
             session.getChannel().close();
-            CONTEXT_MAP.remove(clientId);
+            CONTEXT_MAP.remove(session.getClientId());
         }
     }
 

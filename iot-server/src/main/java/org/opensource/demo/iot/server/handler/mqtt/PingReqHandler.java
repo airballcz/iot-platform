@@ -1,7 +1,6 @@
-package org.opensource.demo.iot.server.handler;
+package org.opensource.demo.iot.server.handler.mqtt;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageType;
@@ -15,17 +14,17 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Created by zchen@idelan.cn on 2017/9/8.
  */
-public class MqttPingReqHandler {
+public class PingReqHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttPingReqHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(PingReqHandler.class);
 
-    private static MqttPingReqHandler ourInstance = new MqttPingReqHandler();
+    private static PingReqHandler ourInstance = new PingReqHandler();
 
-    public static MqttPingReqHandler getInstance() {
+    public static PingReqHandler getInstance() {
         return ourInstance;
     }
 
-    private MqttPingReqHandler() {
+    private PingReqHandler() {
     }
 
     public MqttMessage doMessage(Channel channel, MqttMessage msg) {
@@ -35,7 +34,7 @@ public class MqttPingReqHandler {
         // 更新最新连接时间
         ApplicationContext.updateChannelConTime(channelId);
 
-        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PINGRESP, false, MqttQoS.AT_LEAST_ONCE, true, 0);
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PINGRESP, false, MqttQoS.AT_MOST_ONCE, false, 0);
         MqttMessage message = new MqttMessage(fixedHeader);
 
         return message;

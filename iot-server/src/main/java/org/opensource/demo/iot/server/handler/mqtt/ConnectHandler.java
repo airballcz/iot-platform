@@ -1,4 +1,4 @@
-package org.opensource.demo.iot.server.handler;
+package org.opensource.demo.iot.server.handler.mqtt;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.*;
@@ -16,17 +16,17 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Created by zchen@idelan.cn on 2017/9/7.
  */
-public class MqttConnectHandler {
+public class ConnectHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttConnectHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConnectHandler.class);
 
-    private static MqttConnectHandler ourInstance = new MqttConnectHandler();
+    private static ConnectHandler ourInstance = new ConnectHandler();
 
-    public static MqttConnectHandler getInstance() {
+    public static ConnectHandler getInstance() {
         return ourInstance;
     }
 
-    private MqttConnectHandler() {
+    private ConnectHandler() {
     }
 
     public MqttMessage doMessage(Channel channel, MqttMessage msg) throws MqttConnectionException {
